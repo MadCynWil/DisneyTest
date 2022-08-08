@@ -12,8 +12,12 @@ this.container="";
 this.viewable=4;
 this.prefill=2;
 this.cursor=0;
+this.user={
+row:0,
+col:0,
+active:""
+}
 
-//i would fix the structure of the json
 
 
 this.getData=(source,callback)=>{
@@ -50,20 +54,31 @@ this.renderBlock(shelf,{id:x.set.setId, url:"", class: "shelfSet", text: ""});
 this.fillShelves=(content,holder)=>{
 var x=this.cursor;
 while(x<(this.cursor+this.viewable+this.prefill)){
-console.log(x);
+
 if(!content.containers[x].set.items){break;};
 for (var y of content.containers[x].set.items){
-console.log( y.image.tile);
 var url=this.grabImageUrl(y.image); 
-
-this.renderBlock(document.getElementById(content.containers[x].set.setId), {id:y.contentId,url: url,text: url, class: "content"});
-
+var aimg=this.renderBlock(document.getElementById(content.containers[x].set.setId), {id:y.contentId,url: url,text: "test", class: "content"});
+if (!this.user.active){
+this.setActive(aimg);
+}
 }
 ++x;
 }
 
 return true;
 
+
+}
+
+
+this.setActive=(content)=>{
+if (this.user.lastActive){
+this.user.lastActive.classList.remove("active");
+}
+this.user.lastActive=this.user.active;
+this.user.active=content;
+this.user.active.classList.add("active");
 
 }
 
@@ -89,6 +104,7 @@ block.className=contents.class;
 if (contents.url!=""){
 var i=new Image(160,90);
 i.src=contents.url;
+i.alt=contents.text;
 block.appendChild(i);
 
 }
@@ -117,10 +133,61 @@ this.scaffold=(parentContainer,id)=>{
     return fillChild;
 };
 
+this.nav=(e)=>{
+console.log(e);
+
+/*
+
+switch(e.key){
+case " ":
+this.pageDown();
+break;
+}
+
+*/
+
+var dir=e.keyCode;
+//32=space
+
+
+
+/*39=right
+40=down
+37=left
+38=up
+
+
+
+-30
+-8
+
+
+7    -1  left
+8     0
+9      1  right
+10      2
+*/
+
+
+e.bubbles=false;
+return false;
+}
+
+this.move=(dir)=>{
+console.log(dir % 2);
+}
+
+this.pageDown=()=>{
+
+
+
+}
+
 
 this.init=()=>{
-   
+   window.onkeyup=this.nav;
 	this.getData(this.dataSource,this.fill);
+	
 	console.log(this.container);
 };
 

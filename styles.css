@@ -22,3 +22,24 @@ gap: 10;
     font-weight: bolder;
 	align:block;
 }
+
+.active img{
+	height:135px;
+	width:240px;
+}
+.active {
+  animation-duration: 3s;
+  animation-name: slidein;
+}
+
+@keyframes slidein {
+  from {
+    margin-left: 100%;
+    width: 300%;
+  }
+
+  to {
+    margin-left: 0%;
+    width: 100%;
+  }
+}
