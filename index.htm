@@ -1,0 +1,144 @@
+<html>
+<head>
+
+<link rel="stylesheet" href="styles.css?1"/>
+
+<title></title>
+<script language="javascript">
+let DisneyService=new function(){
+this.dataSource="https://cd-static.bamgrid.com/dp-117731241344/home.json";
+this.dataSource="test.json";
+this.container="";
+this.viewable=4;
+this.prefill=2;
+this.cursor=0;
+
+//i would fix the structure of the json
+
+
+this.getData=(source,callback)=>{
+
+fetch(source)
+.then((response)=>response.json())
+.then((data)=>{ console.log(data);callback(data)});
+
+
+
+}
+
+
+
+this.parse=(contents)=>{
+
+var cdata=contents.data.StandardCollection;
+
+return cdata;
+
+}
+
+this.installShelving=(content,holder)=>{
+for (var x of content.containers){
+console.log(x);
+var sholder=this.renderBlock(holder,{id:x.set.setId, url:"", class: "shelfHolder", text: ""});
+this.renderBlock(sholder,{id:"", url:"", class: "shelfTitle", text: x.set.text.title.full.set.default.content});
+}
+}
+
+this.fillShelves=(content,holder)=>{
+var x=this.cursor;
+while(x<(this.cursor+this.viewable+this.prefill)){
+console.log(x);
+if(!content.containers[x].set.items){break;};
+for (var y of content.containers[x].set.items){
+console.log( y.image.tile);
+var url=this.grabImageUrl(y.image); 
+
+this.renderBlock(document.getElementById(content.containers[x].set.setId), {id:y.contentId,url: url,text: url, class: "content"});
+
+}
+++x;
+}
+
+return true;
+
+
+}
+
+//consider recusion for grabspecific data;
+
+this.grabImageUrl=(content)=>{
+for (var z in content){
+var url=content[z];
+for (var x in content[z]){
+url=content[z][x];
+for (var y in url){
+console.log(url[y].default.url);
+return url[y].default.url;
+}
+}
+break;
+}
+}
+
+this.renderBlock=(blockParent, contents)=>{
+var block=this.scaffold(blockParent,contents.id);
+block.className=contents.class;
+if (contents.url!=""){
+var i=new Image(160,90);
+i.src=contents.url;
+block.appendChild(i);
+
+}
+else{
+block.innerText=contents.text;
+}
+return block;
+
+}
+
+this.fill=(data)=>{
+	var fillRef=document.getElementsByTagName("body");
+	this.container=this.scaffold(fillRef[0],"container");
+	var parsedata=this.parse(data);
+	console.log(parsedata);
+	this.installShelving(parsedata,this.container);
+	this.fillShelves(parsedata,this.container);
+	
+    console.log(this.container);
+};
+
+this.scaffold=(parentContainer,id)=>{
+	var fillChild=document.createElement("div");
+	fillChild.id=id;	
+	parentContainer.appendChild(fillChild);
+    return fillChild;
+};
+
+
+this.init=()=>{
+   
+	this.getData(this.dataSource,this.fill);
+	console.log(this.container);
+};
+
+window.onload=this.init;
+}();
+
+
+</script>
+</head>
+<body>
+
+
+
+
+
+<script language="javascript">
+//user code
+
+// DisneyService.init(fillRef);
+
+</script>
+
+</body>
+</html>
