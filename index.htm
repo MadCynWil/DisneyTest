@@ -41,14 +41,18 @@ return cdata;
 }
 
 this.installShelving=(content,holder)=>{
+var count=0;
 for (var x of content.containers){
 console.log(x);
-var sholder=this.renderBlock(holder,{id:"", url:"", class: "shelf", text: ""});
+
+var sholder=this.renderBlock(holder,{id:"shelf"+count, url:"", class: "shelf", text: ""});
 
 this.renderBlock(sholder,{id:"", url:"", class: "shelfTitle", text: x.set.text.title.full.set.default.content});
 var shelf=this.renderBlock(sholder,{id:"", url:"", class: "shelfItems", text: ""});
 this.renderBlock(shelf,{id:x.set.setId, url:"", class: "shelfSet", text: ""});
+count++;
 }
+
 }
 
 this.fillShelves=(content,holder)=>{
@@ -73,6 +77,7 @@ return true;
 
 
 this.setActive=(content)=>{
+if(!content){return false;}
 if (this.user.lastActive){
 this.user.lastActive.classList.remove("active");
 }
@@ -168,13 +173,27 @@ var dir=e.keyCode;
 10      2
 */
 
-
+this.move(dir-38);
 e.bubbles=false;
 return false;
 }
 
 this.move=(dir)=>{
-console.log(dir % 2);
+((dir%2)==0)?this.moveVert(dir-1):this.moveHorz(dir);
+}
+
+
+
+this.moveHorz=(dir)=>{
+console.log(dir);
+this.setActive(this.user.active[((dir>0)?"previous":"next")+"Sibling"]);
+}
+
+this.moveVert=(dir)=>{
+console.log(this.user.active);
+this.cursor+=1;
+console.log(document.getElementById("shelf"+this.cursor));
+this.setActive();
 }
 
 this.pageDown=()=>{
