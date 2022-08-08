@@ -39,8 +39,11 @@ return cdata;
 this.installShelving=(content,holder)=>{
 for (var x of content.containers){
 console.log(x);
-var sholder=this.renderBlock(holder,{id:x.set.setId, url:"", class: "shelfHolder", text: ""});
+var sholder=this.renderBlock(holder,{id:"", url:"", class: "shelf", text: ""});
+
 this.renderBlock(sholder,{id:"", url:"", class: "shelfTitle", text: x.set.text.title.full.set.default.content});
+var shelf=this.renderBlock(sholder,{id:"", url:"", class: "shelfItems", text: ""});
+this.renderBlock(shelf,{id:x.set.setId, url:"", class: "shelfSet", text: ""});
 }
 }
 

@@ -1,15 +1,24 @@
 body {
 	background-color:000;
 	color:fff;
-	width:100%;
 }
 .content {
-	position:relative;
-	align:right;
-	display:inline;
+align:center;
+gap: 10;
 }
 
-.shelf {
-	width:100%;
-	overflow:hidden;
+
+
+.shelfSet{
+	display: flex;
+	align-items:center;
+	gap: 10px;
+	
+}
+
+.shelfTitle{
+	font-size: x-large;
+    font-family: sans-serif;
+    font-weight: bolder;
+	align:block;
 }
