@@ -3,15 +3,18 @@
 
 <link rel="stylesheet" href="styles.css?1"/>
 
-<title></title>
+<title>Disney Services Test</title>
 <script language="javascript">
 let DisneyService=new function(){
 this.dataSource="https://cd-static.bamgrid.com/dp-117731241344/home.json";
-this.dataSource="test.json";
+//this.dataSource="test.json";
+this.refRoot="https://cd-static.bamgrid.com/dp-117731241344/sets/"; 
 this.container="";
 this.viewable=4;
-this.prefill=2;
+this.prefill=0;
 this.cursor=0;
+this.filledRows=0;
+this.dt="";
 this.user={
 row:0,
 col:0,
@@ -21,21 +24,33 @@ active:""
 
 
 this.getData=(source,callback)=>{
-
 fetch(source)
 .then((response)=>response.json())
 .then((data)=>{ console.log(data);callback(data)});
+}
 
-
+this.launchInfo=()=>{
+console.log(this.user.active);
+//fetch(this.refRoot+this.user.active.id+".json")
+//fetch("https://cd-static.bamgrid.com/dp-117731241344/sets/327aeff3-fe4d-4971-ad95-a78acc884079.json")
+//.then((response)=>console.log(response.json()));
 
 }
 
 
-
 this.parse=(contents)=>{
+return contents.data.StandardCollection;
+var cdata=contents.data.StandardCollection.containers;
 
-var cdata=contents.data.StandardCollection;
+for (var st of cdata){
 
+var a={title:st.set.text.title.full.set,
+items:this.parseItems(st.set.items),
+id:st.set.setId??st.set.refId
+};
+console.log(a);
+
+}
 return cdata;
 
 }
@@ -43,37 +58,62 @@ return cdata;
 this.installShelving=(content,holder)=>{
 var count=0;
 for (var x of content.containers){
-console.log(x);
-
 var sholder=this.renderBlock(holder,{id:"shelf"+count, url:"", class: "shelf", text: ""});
-
 this.renderBlock(sholder,{id:"", url:"", class: "shelfTitle", text: x.set.text.title.full.set.default.content});
 var shelf=this.renderBlock(sholder,{id:"", url:"", class: "shelfItems", text: ""});
-this.renderBlock(shelf,{id:x.set.setId, url:"", class: "shelfSet", text: ""});
+var block=this.renderBlock(shelf,{id:x.set.setId, url:"", class: "shelfSet", text: ""});
 count++;
 }
+}
+
+
+
+this.loadNextRow=()=>{
+var g=document.getElementById("shelf"+this.filledRows);
+
+var fillrow=g.firstChild.nextSibling.firstChild;
+this.fillItems(fillrow,this.filledRows);
 
 }
+
+this.fillRow=(data,id)=>{
+var refset=Object.values(Object.values(data)[0])[0];
+//console.log(refset);
+this.fillShelf(refset.items,refset.setId,document.getElementById("shelf"+this.filledRows).firstElementChild.nextSibling.firstElementChild);
+}
+
+this.fillItems=(row,id)=>{
+
+fetch(this.refRoot+this.dt.containers[id].set.refId+".json")
+.then((response)=>response.json())
+.then((data)=>this.fillRow(data,id));
+ 
+}
+
+this.fillShelf=(items,catId,filldiv)=>{
+
+this.filledRows++;
+if (items){
+
+for (var y of items){
+var url=this.grabImageUrl(y.image);
+var aimg=this.renderBlock(filldiv, {id:y.contentId ,url: url,text: "", class: "content"});
+
+}
+}
+}
+
 
 this.fillShelves=(content,holder)=>{
 var x=this.cursor;
-while(x<(this.cursor+this.viewable+this.prefill)){
-
-if(!content.containers[x].set.items){break;};
-for (var y of content.containers[x].set.items){
-var url=this.grabImageUrl(y.image); 
-var aimg=this.renderBlock(document.getElementById(content.containers[x].set.setId), {id:y.contentId,url: url,text: "test", class: "content"});
-if (!this.user.active){
-this.setActive(aimg);
-}
-}
+while(x<(this.viewable+this.prefill)){
+this.fillShelf(content.containers[x].set.items,content.containers[x].set.setId,document.getElementById(content.containers[x].set.setId));
 ++x;
 }
-
 return true;
-
-
 }
+
+
 
 
 this.setActive=(content)=>{
@@ -87,7 +127,7 @@ this.user.active.classList.add("active");
 
 }
 
-//consider recusion for grabspecific data;
+
 
 this.grabImageUrl=(content)=>{
 for (var z in content){
@@ -110,6 +150,8 @@ if (contents.url!=""){
 var i=new Image(160,90);
 i.src=contents.url;
 i.alt=contents.text;
+console.log(contents);
+i.dataset.refid=contents.id;
 block.appendChild(i);
 
 }
@@ -120,6 +162,7 @@ return block;
 
 }
 
+
 this.fill=(data)=>{
 	var fillRef=document.getElementsByTagName("body");
 	this.container=this.scaffold(fillRef[0],"container");
@@ -127,7 +170,7 @@ this.fill=(data)=>{
 	console.log(parsedata);
 	this.installShelving(parsedata,this.container);
 	this.fillShelves(parsedata,this.container);
-	
+	this.dt=parsedata;
     console.log(this.container);
 };
 
@@ -139,66 +182,40 @@ this.scaffold=(parentContainer,id)=>{
 };
 
 this.nav=(e)=>{
-console.log(e);
+e.preventDefault();
 
-/*
-
-switch(e.key){
-case " ":
-this.pageDown();
-break;
-}
-
-*/
-
+e.stopPropogation=true;
 var dir=e.keyCode;
-//32=space
-
-
-
-/*39=right
-40=down
-37=left
-38=up
-
-
-
--30
--8
-
-
-7    -1  left
-8     0
-9      1  right
-10      2
-*/
-
+if (dir==13||dir==32){
+this.launchInfo();
+}
+else{
 this.move(dir-38);
+}
 e.bubbles=false;
 return false;
 }
 
 this.move=(dir)=>{
+
 ((dir%2)==0)?this.moveVert(dir-1):this.moveHorz(dir);
 }
 
 
 
 this.moveHorz=(dir)=>{
-console.log(dir);
-this.setActive(this.user.active[((dir>0)?"previous":"next")+"Sibling"]);
+
+this.setActive(this.user.active[((dir<0)?"previous":"next")+"Sibling"]);
+
 }
 
 this.moveVert=(dir)=>{
-console.log(this.user.active);
-this.cursor+=1;
-console.log(document.getElementById("shelf"+this.cursor));
-this.setActive();
+this.loadNextRow();
+this.cursor=Math.max(dir+this.cursor,0);
+this.setActive(document.getElementById("shelf"+this.cursor).children[1].firstChild.firstChild,"Shelf");
 }
 
 this.pageDown=()=>{
-
-
 
 }
 
