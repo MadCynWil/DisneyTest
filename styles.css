@@ -10,10 +10,10 @@ gap: 10;
 
 
 .shelfSet{
+	position:relative;
 	display: flex;
 	align-items:center;
-	//height:110;
-	
+	overflow:hidden;
 	gap: 10px;
 	
 }
@@ -24,24 +24,14 @@ gap: 10;
     font-weight: bolder;
 	align:fixed;
 }
-
-.active img{
+img{
+  width: 160px;
+  height:90px;
+  transition-property: height;
+  transition-propert:width;
+  transition-duration: 2s;
+}
+.active img {
 	height:135px;
 	width:240px;
-}
-.active {
-  animation-duration: 2s;
-  animation-name: slidein;
-}
-
-@keyframes slidein {
-  from {
-    margin-left: 100%;
-    width: 300%;
-  }
-
-  to {
-    margin-left: 0%;
-    width: 100%;
-  }
 }
